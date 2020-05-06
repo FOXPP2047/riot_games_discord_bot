@@ -37,6 +37,8 @@ app.on("message", msg => {
             printName = parsedData.name;
             msg.reply(printName + "님의 레벨은 " + parsedData.summonerLevel + "입니다.");
           });
+        } else if(res.statusCode === BADGATE) {
+          msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
   } else if(res[0] === "!티어" || res[0] === "!티어솔로") {
@@ -59,6 +61,8 @@ app.on("message", msg => {
               }
             });
           });
+        } else if(res.statusCode === BADGATE) {
+          msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
   } else if(res[0] === "!티어팀랭") {
@@ -81,6 +85,8 @@ app.on("message", msg => {
               }
             });
           });
+        } else if(res.statusCode === BADGATE) {
+          msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
   } else if(res[0] === "!라인") {
@@ -112,6 +118,8 @@ app.on("message", msg => {
               }
             });
           });
+        } else if(res.statusCode === BADGATE) {
+          msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
   } else if(res[0] === "!숙련도") {
@@ -159,6 +167,8 @@ app.on("message", msg => {
               }
             });
           });
+        } else if(res.statusCode === BADGATE) {
+          msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
   } else if(res[0] === "!현재") {
@@ -213,6 +223,8 @@ app.on("message", msg => {
               }
             });
           });
+        } else if(res.statusCode === BADGATE) {
+          msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
   }
