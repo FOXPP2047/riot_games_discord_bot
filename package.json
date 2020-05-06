@@ -1,0 +1,23 @@
+{
+  "name": "riot_games_discord_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FOXPP2047/riot_games_discord_bot.git"
+  },
+  "author": "Yongmin Cho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FOXPP2047/riot_games_discord_bot/issues"
+  },
+  "homepage": "https://github.com/FOXPP2047/riot_games_discord_bot#readme",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "jsonloader": "^1.0.1"
+  }
+}
