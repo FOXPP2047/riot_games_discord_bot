@@ -17,6 +17,9 @@ app.on("ready", () => {
 
 app.on("message", msg => {
   let userMsg = msg.content;
+  if(userMsg === "하위" || userMsg === "해위" || userMsg === "해에에위") {
+    msg.reply("하아아아위");
+  }
   let res = userMsg.split(" ");
   let name = res[1];
   var printName = "";
