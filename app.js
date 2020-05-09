@@ -17,9 +17,6 @@ app.on("ready", () => {
 
 app.on("message", msg => {
   let userMsg = msg.content;
-  if(userMsg === "하위" || userMsg === "해위" || userMsg === "해에에위") {
-    msg.reply("하아아아위");
-  }
   let res = userMsg.split(" ");
   let name = res[1];
   var printName = "";
@@ -30,7 +27,7 @@ app.on("message", msg => {
 
   var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
 
-  if(res[0] === "!레벨") {
+  if(res[0] === "!레벨" || res[0] === "!level") {
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
 
     https.get(link, function(res) {
@@ -44,7 +41,7 @@ app.on("message", msg => {
           msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
-  } else if(res[0] === "!티어" || res[0] === "!티어솔로") {
+  } else if(res[0] === "!티어" || res[0] === "!티어솔로" || res[0] === "!tier" || res[0] === "solotier") {
     var user_id = "";
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
     https.get(link, function(res) {
@@ -68,7 +65,7 @@ app.on("message", msg => {
           msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
-  } else if(res[0] === "!티어팀랭") {
+  } else if(res[0] === "!티어팀랭" || res[0] === "!teamtier") {
     var user_id = "";
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
     https.get(link, function(res) {
@@ -92,7 +89,7 @@ app.on("message", msg => {
           msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
-  } else if(res[0] === "!라인") {
+  } else if(res[0] === "!라인" || res[0] === "!line") {
     var account_id = "";
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
     https.get(link, function(res) {
@@ -125,7 +122,7 @@ app.on("message", msg => {
           msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
-  } else if(res[0] === "!숙련도") {
+  } else if(res[0] === "!숙련도" || res[0] === "!master") {
     var user_id = "";
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
     https.get(link, function(res) {
@@ -174,7 +171,7 @@ app.on("message", msg => {
           msg.reply(name + "은 잘못된 소환사 명 입니다.");
         }
     });
-  } else if(res[0] === "!현재") {
+  } else if(res[0] === "!현재" || res[0] === "!current") {
     var user_id = "";
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
     https.get(link, function(res) {
