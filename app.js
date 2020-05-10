@@ -15,6 +15,8 @@ let url = "https://kr.api.riotgames.com/lol";
 let region = "한국";
 
 app.on("ready", () => {
+  region = "한국";
+  url = "https://kr.api.riotgames.com/lol";
   console.log("Logged in as ${app.user.tag}!");
 });
 
@@ -28,6 +30,16 @@ app.on("message", msg => {
     name += res[i];
   }
 
+  if(res[0] === "!헬프" || res[0] === "!도움" || res[0] === "!help") {
+    msg.reply("```md\n" + "- 검색서버 바꾸는 법: !세팅 + region ex)!세팅 북미" + "\n" +
+              "- 현재 검색 서버 확인: !지역" + "\n" +
+              "- 소환사의 레벨 검색: !레벨 + 소환사명 ex)!레벨 비버클라스" + "\n" +
+              "- 소환사의 솔로랭크 티어 검색: !티어 소환사명 ex)!티어 Take a risk" + "\n" +
+              "- 소환사의 팀랭크 티어 검색: !티어팀랭 소환사명 ex)!티어팀랭 용 깔" + "\n" +
+              "- 소환사의 주 라인 검색: !라인 소환사명 ex)!라인 배려와 존중" + "\n" +
+              "- 소환사의 챔피언 숙련도 검색: !숙련도 소환사명 ex)!숙련도 강제미드행" + "\n" +
+              "- 소환사 현재 게임 상태 검색: !현재 소환사명 ex)!현재 비버클라스" + "\n" + "```");
+  }
   if(res[0] === "!세팅" || res[0] === "!set") {
     if(name === "북미" || name === "na") {
       url = "https://na1.api.riotgames.com/lol";
@@ -48,14 +60,14 @@ app.on("message", msg => {
       url = "https://euw1.api.riotgames.com/lol";
       region = "북유럽";
     }
-    msg.reply("검색지역이 " + region + "서버로 변경되었습니다.");
+    msg.reply("```md\n" + "검색지역이 " + region + "서버로 변경되었습니다." + "\n" + "```");
   }
 
-  if(res[0] === "!지역" || res[0] === "!region") {
-    msg.reply("현재 검색 서버는 " + region + "입니다.\n" +
-              "서버 바꾸기를 원하실 경우 !세팅 키워드를 이용해 주세요.");
+  if(res[0] === "!지역" || res[0] === "현재지역" ||res[0] === "!region") {
+    msg.reply("```md\n" + "현재 검색 서버는 " + region + "입니다.\n" +
+              "검색 서버 바꾸기를 원하실 경우 !세팅 키워드를 이용해 주세요." + "\n" + "```");
   }
-  var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
+  //var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
 
   if(res[0] === "!레벨" || res[0] === "!level") {
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
@@ -65,10 +77,10 @@ app.on("message", msg => {
           res.on("data", function(data) {
             var parsedData = JSON.parse(data);
             printName = parsedData.name;
-            msg.reply(printName + "님의 레벨은 " + parsedData.summonerLevel + "입니다.");
+            msg.reply("```md\n" + printName + "님의 레벨은 " + parsedData.summonerLevel + "입니다." + "\n" + "```");
           });
         } else if(res.statusCode === BADGATE) {
-          msg.reply(name + "은 잘못된 소환사 명 입니다.");
+          msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
         }
     });
   } else if(res[0] === "!티어" || res[0] === "!티어솔로" || res[0] === "!tier" || res[0] === "solotier") {
@@ -86,13 +98,15 @@ app.on("message", msg => {
               if(res.statusCode === CONNECTED) {
                 res.on("data", function(data) {
                   var parsedData = JSON.parse(data);
-                  msg.reply(printName + "님의 티어는 " + parsedData[0].tier + " " + parsedData[0].rank + " " + "입니다.");
+                  if(typeof parsedData[0] === "undefined")
+                      msg.reply("```md\n" + printName + "님의 티어는 언랭입니다." + "\n" + "```");
+                  else msg.reply("```md\n" + printName + "님의 티어는 " + parsedData[0].tier + " " + parsedData[0].rank + " " + "입니다." + "\n" + "```");
                 });
               }
             });
           });
         } else if(res.statusCode === BADGATE) {
-          msg.reply(name + "은 잘못된 소환사 명 입니다.");
+          msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
         }
     });
   } else if(res[0] === "!티어팀랭" || res[0] === "!teamtier") {
@@ -110,13 +124,15 @@ app.on("message", msg => {
               if(res.statusCode === CONNECTED) {
                 res.on("data", function(data) {
                   var parsedData = JSON.parse(data);
-                  msg.reply(printName + "님의 티어는 " + parsedData[1].tier + " " + parsedData[1].rank + " " + "입니다.");
+                  if(typeof parsedData[0] === "undefined")
+                      msg.reply("```md\n" + printName + "님의 티어는 언랭입니다." + "\n" + "```");
+                  else msg.reply("```md\n" + printName + "님의 티어는 " + parsedData[1].tier + " " + parsedData[1].rank + " " + "입니다." + "\n" + "```");
                 });
               }
             });
           });
         } else if(res.statusCode === BADGATE) {
-          msg.reply(name + "은 잘못된 소환사 명 입니다.");
+          msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
         }
     });
   } else if(res[0] === "!라인" || res[0] === "!line") {
@@ -139,17 +155,17 @@ app.on("message", msg => {
                       line[parsedData.matches[i].lane]++;
                   }
                   let rankCount = 20 - Number(line["NONE"])
-                  msg.reply(printName + "님은 최근 " + rankCount + "의 랭크 게임중\n" +
+                  msg.reply("```md\n" + printName + "님은 최근 " + rankCount + "의 랭크 게임중\n" +
                             printName + "님은 최근 TOP을 " + line["TOP"] + "번 플레이 했습니다.\n" +
                             printName + "님은 최근 JUNGLE을 " + line["JUNGLE"] + "번 플레이 했습니다.\n" +
                             printName + "님은 최근 MID를 " + line["MID"] + "번 플레이 했습니다.\n" +
-                            printName + "님은 최근 BOTTOM을 " + line["BOTTOM"] + "번 플레이 했습니다.\n");
+                            printName + "님은 최근 BOTTOM을 " + line["BOTTOM"] + "번 플레이 했습니다.\n" + "```");
                 });
               }
             });
           });
         } else if(res.statusCode === BADGATE) {
-          msg.reply(name + "은 잘못된 소환사 명 입니다.");
+          msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
         }
     });
   } else if(res[0] === "!숙련도" || res[0] === "!master") {
@@ -190,15 +206,15 @@ app.on("message", msg => {
                     }
                   }
 
-                  msg.reply(printName + "님의 최고 숙련 챔피언은 " + champName[0] + "이고, 숙련도는 " + championPoint[0] + " 입니다.\n" +
+                  msg.reply("```md\n" + printName + "님의 최고 숙련 챔피언은 " + champName[0] + "이고, 숙련도는 " + championPoint[0] + " 입니다.\n" +
                                         "두번째 숙련 챔피언은 " + champName[1] + "이고, 숙련도는 " + championPoint[1] + " 입니다.\n" +
-                                        "세번째 숙련 챔피언은 " + champName[2] + "이고, 숙련도는 " + championPoint[2] + " 입니다.");
+                                        "세번째 숙련 챔피언은 " + champName[2] + "이고, 숙련도는 " + championPoint[2] + " 입니다." + "\n```");
                 })
               }
             });
           });
         } else if(res.statusCode === BADGATE) {
-          msg.reply(name + "은 잘못된 소환사 명 입니다.");
+          msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
         }
     });
   } else if(res[0] === "!현재" || res[0] === "!current") {
@@ -244,19 +260,19 @@ app.on("message", msg => {
                         if(champions.data[data]["key"] == currentChampionId)
                           currentChampionName = champions.data[data]["name"];
                     }
-                  msg.reply(printName + "님은 현재 " + currentChampionName + "을 플레이 중입니다.\n" +
+                  msg.reply("```md\n" + printName + "님은 현재 " + currentChampionName + "을 플레이 중입니다.\n" +
                             "아군 : " + withSummoners + "\n" +
-                            "적군 : " + notSummoners);
+                            "적군 : " + notSummoners + "\n```");
                 })
               } else if(res.statusCode === BADGATE) {
-                msg.reply(printName + "님은 현재 게임 중이 아닙니다.");
+                msg.reply("```md\n" + printName + "님은 현재 게임 중이 아닙니다." + "\n" + "```");
               } else if(res.statusCode === BADREQUEST) {
-                msg.reply(printName + "님은 잘못된 소환사 명 입니다.");
+                msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
               }
             });
           });
         } else if(res.statusCode === BADGATE) {
-          msg.reply(name + "은 잘못된 소환사 명 입니다.");
+          msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
         }
     });
   }
