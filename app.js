@@ -5,6 +5,7 @@ const https = require("https");
 
 const CONNECTED = 200;
 const BADGATE = 404;
+const BADREQUEST = 400;
 
 const jsonLoader = require("jsonloader");
 let jsonTokenFile = new jsonLoader("config.json");
@@ -241,6 +242,8 @@ app.on("message", msg => {
                 })
               } else if(res.statusCode === BADGATE) {
                 msg.reply(printName + "님은 현재 게임 중이 아닙니다.");
+              } else if(res.statusCode === BADREQUEST) {
+                msg.reply(printName + "님은 잘못된 소환사 명 입니다.");
               }
             });
           });
