@@ -78,7 +78,6 @@ app.on("message", msg => {
             });
           } else if(res.statusCode === BADGATE) {
             reject();
-            //msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
           }
         });
       });
@@ -86,7 +85,6 @@ app.on("message", msg => {
     summonerData().then(function(data) {
       if(res[0] === "!레벨" || res[0] === "!level") {
         msg.reply("```md\n" + data.name + "님의 레벨은 " + data.summonerLevel + "입니다." + "\n" + "```");
-        return;
       } else if(res[0] === "!티어" || res[0] === "!티어솔로" || res[0] === "!tier" || res[0] === "solotier") {
         var link = url + "/league/v4/entries/by-summoner/" + data.id + "?api_key=" + key;
         https.get(link, function(res) {
@@ -210,24 +208,77 @@ app.on("message", msg => {
           }
         });
       } else if(res[0] === "!최근" || res[0] === "!recent") {
-        var link = url + "/match/v4/matchlists/by-account/" + data.accountId + "?api_key=" + key;
-        https.get(link, function(res) {
-          var buffers = [];
-           res.on("data", function(chunk) {
-             buffers.push(chunk);
-           })
-           .on("end", function() {
-             var parsedData = JSON.parse(Buffer.concat(buffers).toString());
-             const matchId = [];
-             let teamId = 0;
-             let participantId = 0;
+        let win = 0;
+        let lose = 0;
+        let remake = 0;
 
-             for(let i = 0; i < RECENT_MATCH; ++i) {
-              matchId.push(parsedData.matches[i].gameId);
-             }
-             console.log(matchId);
-           });//res.on("end")
-        }); //https.get
+        let teamId = 0;
+        let participantId = 0;
+
+        var link = url + "/match/v4/matchlists/by-account/" + data.accountId + "?api_key=" + key;
+
+        const finalData = function() {
+          return new Promise(function(resolve) {
+            https.get(link, function(res) {
+              const buffers = [];
+              res.on("data", function(chunk) {
+                buffers.push(chunk);
+              })
+              .on("end", function() {
+                var parsedData = JSON.parse(Buffer.concat(buffers).toString());
+                resolve(parsedData);
+              });
+            });
+          });
+        }
+        finalData().then(function(pData) {
+          const matchId = [];
+          for(let i = 0; i < RECENT_MATCH; ++i)
+            matchId.push(pData.matches[i].gameId);
+          for(let i = 0; i < RECENT_MATCH; ++i) {
+            var link = url + "/match/v4/matches/" + matchId[i] + "?api_key=" + key;
+            const gameData = function() {
+              return new Promise(function(resolve) {
+                https.get(link, function(res) {
+                  const buffers = [];
+                  res.on("data", function(chunk) {
+                    buffers.push(chunk);
+                  })
+                  .on("end", function() {
+                    var parsedData = JSON.parse(Buffer.concat(buffers).toString());
+                    resolve(parsedData);
+                  });
+                });//https.get(link)
+              });
+            } //const gameData
+            gameData().then(function(pData) {
+              for(let i in pData.participantIdentities) {
+                if(pData.participantIdentities[i].player.summonerName === data.name) {
+                  participantId = pData.participantIdentities[i].participantId;
+                  break;
+                }
+              }
+              for(let i in pData.participants) {
+                if(pData.participants[i].participantId === participantId) {
+                  teamId = pData.participants[i].teamId;
+                  break;
+                }
+              }
+              for(let i in pData.teams) {
+                if(pData.teams[i].teamId === teamId) {
+                  if(pData.teams[i].win === "Win") {
+                    win++;
+                  } else if(pData.teams[i].win === "Fail") {
+                    lose++;
+                  } else {
+                    remake++;
+                  }
+                }
+              }
+              console.log(win, lose, remake);
+            });//then
+          } //20 loops for game data using matchId
+        });
       }
     }, function() {
       msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
