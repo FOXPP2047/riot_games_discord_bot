@@ -25,6 +25,27 @@ app.on("message", msg => {
     name += res[i];
   }
 
+  if(res[0] === "!세팅" || res[0] === "!set") {
+    if(name === "북미" || name === "na") {
+      url = "https://na1.api.riotgames.com/lol";
+      msg.reply("검색지역이 북미서버로 변경되었습니다.");
+    } else if(name === "한국" || name === "kr") {
+      url = "https://kr.api.riotgames.com/lol";
+      msg.reply("검색지역이 한국서버로 변경되었습니다.");
+    } else if(name === "일본" || name === "jp") {
+      url = "https://jp1.api.riotgames.com/lol";
+      msg.reply("검색지역이 일본서버로 변경되었습니다.");
+    } else if(name === "브라질" || name === "br") {
+      url = "https://br1.api.riotgames.com/lol";
+      msg.reply("검색지역이 브라질서버로 변경되었습니다.");
+    } else if(name === "유럽" || name === "서유럽" || name === "eu") {
+      url = "https://euw1.api.riotgames.com/lol";
+      msg.reply("검색지역이 서유럽서버로 변경되었습니다.");
+    } else if(name === "북유럽" || name === "euw") {
+      url = "https://euw1.api.riotgames.com/lol";
+      msg.reply("검색지역이 북유럽서버로 변경되었습니다.");
+    }
+  }
   var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
 
   if(res[0] === "!레벨" || res[0] === "!level") {
