@@ -12,6 +12,8 @@ let jsonTokenFile = new jsonLoader("config.json");
 const key = jsonTokenFile.api_key;
 let url = "https://kr.api.riotgames.com/lol";
 
+let region = "한국";
+
 app.on("ready", () => {
   console.log("Logged in as ${app.user.tag}!");
 });
@@ -29,23 +31,29 @@ app.on("message", msg => {
   if(res[0] === "!세팅" || res[0] === "!set") {
     if(name === "북미" || name === "na") {
       url = "https://na1.api.riotgames.com/lol";
-      msg.reply("검색지역이 북미서버로 변경되었습니다.");
+      region = "북미";
     } else if(name === "한국" || name === "kr") {
       url = "https://kr.api.riotgames.com/lol";
-      msg.reply("검색지역이 한국서버로 변경되었습니다.");
+      region = "한국";
     } else if(name === "일본" || name === "jp") {
       url = "https://jp1.api.riotgames.com/lol";
-      msg.reply("검색지역이 일본서버로 변경되었습니다.");
+      region = "일본";
     } else if(name === "브라질" || name === "br") {
       url = "https://br1.api.riotgames.com/lol";
-      msg.reply("검색지역이 브라질서버로 변경되었습니다.");
+      region = "브라질";
     } else if(name === "유럽" || name === "서유럽" || name === "eu") {
       url = "https://euw1.api.riotgames.com/lol";
-      msg.reply("검색지역이 서유럽서버로 변경되었습니다.");
+      region = "서유럽";
     } else if(name === "북유럽" || name === "euw") {
       url = "https://euw1.api.riotgames.com/lol";
-      msg.reply("검색지역이 북유럽서버로 변경되었습니다.");
+      region = "북유럽";
     }
+    msg.reply("검색지역이 " + region + "서버로 변경되었습니다.");
+  }
+
+  if(res[0] === "!지역" || res[0] === "!region") {
+    msg.reply("현재 검색 서버는 " + region + "입니다.\n" +
+              "서버 바꾸기를 원하실 경우 !세팅 키워드를 이용해 주세요.");
   }
   var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
 
