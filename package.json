@@ -18,6 +18,7 @@
   "homepage": "https://github.com/FOXPP2047/riot_games_discord_bot#readme",
   "dependencies": {
     "discord.js": "^12.2.0",
-    "jsonloader": "^1.0.1"
+    "jsonloader": "^1.0.1",
+    "mongoose": "^5.9.13"
   }
 }

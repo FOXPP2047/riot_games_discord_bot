@@ -2,10 +2,12 @@ const discord = require("discord.js");
 const app = new discord.Client();
 
 const https = require("https");
+const mongoose = require("mongoose");
 
 const CONNECTED = 200;
 const BADGATE = 404;
 const BADREQUEST = 400;
+const REJECT = 403;
 
 const RECENT_MATCH = 20;
 
@@ -13,6 +15,17 @@ const jsonLoader = require("jsonloader");
 let jsonTokenFile = new jsonLoader("config.json");
 const key = jsonTokenFile.api_key;
 let url = "https://kr.api.riotgames.com/lol";
+
+mongoose.connect("mongodb://localhost:27017/UserDataDB", {useNewUrlParser: true, useUnifiedTopology: true});
+
+const userDataSchema = {
+  keyword: String,
+  name: String,
+  id: String,
+  accountId: String
+};
+
+const UserData = mongoose.model("UserData", userDataSchema);
 
 let region = "한국";
 
@@ -67,17 +80,41 @@ app.on("message", msg => {
     msg.reply("```md\n" + "현재 검색 서버는 " + region + "입니다.\n" +
               "검색 서버 바꾸기를 원하실 경우 !세팅 키워드를 이용해 주세요." + "\n" + "```");
   } else if(res[0][0] === "!") {
+
     var link = url + "/summoner/v4/summoners/by-name/" + name + "?api_key=" + key;
     const summonerData = function() {
       return new Promise(function(resolve, reject) {
-        https.get(link, function(res) {
-          if(res.statusCode === CONNECTED) {
-            res.on("data", function(data) {
-              var parsedData = JSON.parse(data);
-              resolve(parsedData);
+        UserData.find({keyword: name}, function(err, uData) {
+          if(!uData.length || res[0] === "!레벨" || res[0] === "!level") {
+            https.get(link, function(res) {
+              if(res.statusCode === CONNECTED) {
+                res.on("data", function(data) {
+                  var parsedData = JSON.parse(data);
+                  if(!uData.length) {
+                    const newUser = new UserData({
+                      keyword: name,
+                      name: parsedData.name,
+                      id: parsedData.id,
+                      accountId: parsedData.accountId
+                    });
+                    newUser.save();
+                  }
+                  resolve(parsedData);
+                });
+              } else if(res.statusCode === BADGATE) {
+                reject();
+              } else if(res.statusCode === REJECT) {
+                console.log("현재 API KEY가 만료됨");
+                reject();
+              }
             });
-          } else if(res.statusCode === BADGATE) {
-            reject();
+          } else {
+            const userDataObj = {
+              name: uData[0].name,
+              id: uData[0].id,
+              accountId: uData[0].accountId
+            }
+            resolve(userDataObj);
           }
         });
       });
@@ -87,14 +124,19 @@ app.on("message", msg => {
         msg.reply("```md\n" + data.name + "님의 레벨은 " + data.summonerLevel + "입니다." + "\n" + "```");
       } else if(res[0] === "!티어" || res[0] === "!티어솔로" || res[0] === "!tier" || res[0] === "solotier") {
         var link = url + "/league/v4/entries/by-summoner/" + data.id + "?api_key=" + key;
+
         https.get(link, function(res) {
             if(res.statusCode === CONNECTED) {
               res.on("data", function(finalData) {
                 var parsedData = JSON.parse(finalData);
-                if(typeof parsedData[0] === "undefined")
-                    msg.reply("```md\n" + data.name + "님은 현재 UNRANKED 입니다." + "\n" + "```");
-                else msg.reply("```md\n" + data.name + "님의 티어는 " + parsedData[0].tier + " " +
-                               parsedData[0].rank + " " + "입니다." + "\n" + "```");
+                if(!parsedData.length)
+                  msg.reply("```md\n" + data.name + "님은 현재 UNRANKED 입니다." + "\n" + "```");
+                parsedData.forEach(element => {
+                  if(element.queueType === "RANKED_FLEX_SR") {
+                    msg.reply("```md\n" + data.name + "님의 티어는 " + element.tier + " " +
+                                   element.rank + " " + "입니다." + "\n" + "```");
+                  }
+                });
               });
             }
         });
@@ -104,10 +146,14 @@ app.on("message", msg => {
             if(res.statusCode === CONNECTED) {
               res.on("data", function(finalData) {
                 var parsedData = JSON.parse(finalData);
-                if(typeof parsedData[0] === "undefined")
-                    msg.reply("```md\n" + data.name + "님은 현재 UNRANKED 입니다." + "\n" + "```");
-                else msg.reply("```md\n" + data.name + "님의 티어는 " + parsedData[1].tier + " " +
-                               parsedData[1].rank + " " + "입니다." + "\n" + "```");
+                if(!parsedData.length)
+                  msg.reply("```md\n" + data.name + "님은 현재 UNRANKED 입니다." + "\n" + "```");
+                parsedData.forEach(element => {
+                  if(element.queueType === "RANKED_FLEX_SR") {
+                    msg.reply("```md\n" + data.name + "님의 티어는 " + element.tier + " " +
+                                   element.rank + " " + "입니다." + "\n" + "```");
+                  }
+                });
               });
             }
         });
@@ -206,78 +252,6 @@ app.on("message", msg => {
           } else if(res.statusCode === BADREQUEST) {
             msg.reply("```md\n" + name + "은 잘못된 소환사 명 입니다." + "\n" + "```");
           }
-        });
-      } else if(res[0] === "!최근" || res[0] === "!recent") {
-        let win = 0;
-        let lose = 0;
-        let remake = 0;
-
-        let teamId = 0;
-        let participantId = 0;
-
-        var link = url + "/match/v4/matchlists/by-account/" + data.accountId + "?api_key=" + key;
-
-        const finalData = function() {
-          return new Promise(function(resolve) {
-            https.get(link, function(res) {
-              const buffers = [];
-              res.on("data", function(chunk) {
-                buffers.push(chunk);
-              })
-              .on("end", function() {
-                var parsedData = JSON.parse(Buffer.concat(buffers).toString());
-                resolve(parsedData);
-              });
-            });
-          });
-        }
-        finalData().then(function(pData) {
-          const matchId = [];
-          for(let i = 0; i < RECENT_MATCH; ++i)
-            matchId.push(pData.matches[i].gameId);
-          for(let i = 0; i < RECENT_MATCH; ++i) {
-            var link = url + "/match/v4/matches/" + matchId[i] + "?api_key=" + key;
-            const gameData = function() {
-              return new Promise(function(resolve) {
-                https.get(link, function(res) {
-                  const buffers = [];
-                  res.on("data", function(chunk) {
-                    buffers.push(chunk);
-                  })
-                  .on("end", function() {
-                    var parsedData = JSON.parse(Buffer.concat(buffers).toString());
-                    resolve(parsedData);
-                  });
-                });//https.get(link)
-              });
-            } //const gameData
-            gameData().then(function(pData) {
-              for(let i in pData.participantIdentities) {
-                if(pData.participantIdentities[i].player.summonerName === data.name) {
-                  participantId = pData.participantIdentities[i].participantId;
-                  break;
-                }
-              }
-              for(let i in pData.participants) {
-                if(pData.participants[i].participantId === participantId) {
-                  teamId = pData.participants[i].teamId;
-                  break;
-                }
-              }
-              for(let i in pData.teams) {
-                if(pData.teams[i].teamId === teamId) {
-                  if(pData.teams[i].win === "Win") {
-                    win++;
-                  } else if(pData.teams[i].win === "Fail") {
-                    lose++;
-                  } else {
-                    remake++;
-                  }
-                }
-              }
-              console.log(win, lose, remake);
-            });//then
-          } //20 loops for game data using matchId
         });
       }
     }, function() {
