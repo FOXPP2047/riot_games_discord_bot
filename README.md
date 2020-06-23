@@ -5,6 +5,7 @@ This is Searching Bot for League of Legend in Discord.
 
 ## Riot API
 This is a discord bot that searches user data using riot API.
+You can see everything of data when you did in League of Lengends.
 There are some keywords.
 ```
 !헬프, !도움, !help : you can see all keywords how to operate. 
