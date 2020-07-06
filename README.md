@@ -1,7 +1,7 @@
 # Discord LOL Searching Bot Using Riot API
 This is Searching Bot for League of Legend in Discord.
 
-## Node.js (discord.js, jsonloader, https, mongoose)
+## Node.js (discord.js, jsonloader, https, Nosql(mongoose))
 
 ## Riot API
 This is a discord bot that searches user data using riot API.
