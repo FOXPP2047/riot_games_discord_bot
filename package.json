@@ -19,6 +19,6 @@
   "dependencies": {
     "discord.js": "^12.2.0",
     "jsonloader": "^1.0.1",
-    "mongoose": "^5.9.13"
+    "mongoose": "^5.13.15"
   }
 }
